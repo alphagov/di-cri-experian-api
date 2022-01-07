@@ -1,19 +1,19 @@
-package uk.gov.di.ipv.cri.experian.gateway.crosscore;
+package uk.gov.di.ipv.cri.experian.gateway;
 
 import uk.gov.di.ipv.cri.experian.domain.AddressType;
 import uk.gov.di.ipv.cri.experian.domain.PersonAddress;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Address;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Applicant;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Application;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Contact;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.CrossCoreApiRequest;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Header;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Name;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Options;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Payload;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.Person;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.PersonDetails;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Address;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Applicant;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Application;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Contact;
+import uk.gov.di.ipv.cri.experian.gateway.dto.CrossCoreApiRequest;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Header;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Name;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Options;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Payload;
+import uk.gov.di.ipv.cri.experian.gateway.dto.Person;
+import uk.gov.di.ipv.cri.experian.gateway.dto.PersonDetails;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;

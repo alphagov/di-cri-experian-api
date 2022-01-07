@@ -1,4 +1,4 @@
-package uk.gov.di.ipv.cri.experian.security;
+package uk.gov.di.ipv.cri.experian.gateway;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -3,7 +3,7 @@ package uk.gov.di.ipv.cri.experian.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.CrossCoreGateway;
+import uk.gov.di.ipv.cri.experian.gateway.CrossCoreGateway;
 
 public class IdentityVerificationService {
     private final CrossCoreGateway crossCoreGateway;

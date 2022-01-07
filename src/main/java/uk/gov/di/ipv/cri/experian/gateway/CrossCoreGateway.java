@@ -1,10 +1,9 @@
-package uk.gov.di.ipv.cri.experian.gateway.crosscore;
+package uk.gov.di.ipv.cri.experian.gateway;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.di.ipv.cri.experian.config.CrossCoreApiConfig;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.CrossCoreApiRequest;
-import uk.gov.di.ipv.cri.experian.security.HmacGenerator;
+import uk.gov.di.ipv.cri.experian.gateway.dto.CrossCoreApiRequest;
 
 import java.io.IOException;
 import java.net.URI;

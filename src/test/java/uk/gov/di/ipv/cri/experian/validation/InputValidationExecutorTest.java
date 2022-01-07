@@ -12,6 +12,7 @@ import uk.gov.di.ipv.cri.experian.util.TestDataCreator;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,8 +23,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InputValidationExecutorTest {
-    @Mock
-    private Validator mockValidator;
+    @Mock private Validator mockValidator;
     private InputValidationExecutor inputValidationExecutor;
 
     @BeforeEach
@@ -47,11 +47,11 @@ class InputValidationExecutorTest {
     void shouldReturnInvalidValidationResultWhenInvalidInputProvided() {
         final String validationErrorMsg = "validation error message";
         final PersonIdentity personIdentity = TestDataCreator.createTestPersonIdentity();
-        ConstraintViolation<?> mockConstraintViolation =
-                Mockito.mock(ConstraintViolation.class);
+        ConstraintViolation<?> mockConstraintViolation = Mockito.mock(ConstraintViolation.class);
         when(mockConstraintViolation.getMessage()).thenReturn(validationErrorMsg);
         Mockito.doReturn(Set.of(mockConstraintViolation))
-                .when(mockValidator).validate(personIdentity);
+                .when(mockValidator)
+                .validate(personIdentity);
 
         ValidationResult validationResult =
                 inputValidationExecutor.performInputValidation(personIdentity);
@@ -60,5 +60,4 @@ class InputValidationExecutorTest {
         assertEquals(1, validationResult.getErrors().size());
         assertEquals(validationErrorMsg, validationResult.getErrors().get(0));
     }
-
 }

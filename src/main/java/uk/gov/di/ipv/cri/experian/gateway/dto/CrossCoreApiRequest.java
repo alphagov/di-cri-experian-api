@@ -1,4 +1,4 @@
-package uk.gov.di.ipv.cri.experian.gateway.crosscore.dto;
+package uk.gov.di.ipv.cri.experian.gateway.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

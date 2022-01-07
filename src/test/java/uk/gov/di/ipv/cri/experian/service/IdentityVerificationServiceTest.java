@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.CrossCoreGateway;
+import uk.gov.di.ipv.cri.experian.gateway.CrossCoreGateway;
 
 import java.io.IOException;
 

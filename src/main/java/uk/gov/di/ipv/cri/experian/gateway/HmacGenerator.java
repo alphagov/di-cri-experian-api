@@ -1,4 +1,4 @@
-package uk.gov.di.ipv.cri.experian.security;
+package uk.gov.di.ipv.cri.experian.gateway;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,7 +19,7 @@ public class HmacGenerator {
         this.sha256Hmac.init(secretKey);
     }
 
-    public String generateHmac(String input) {
+    String generateHmac(String input) {
         Objects.requireNonNull(input, "The input must not be null");
         return Base64.getEncoder().encodeToString(sha256Hmac.doFinal(input.getBytes()));
     }

@@ -11,10 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.ipv.cri.experian.config.CrossCoreApiConfig;
 import uk.gov.di.ipv.cri.experian.domain.AddressType;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.CrossCoreApiRequestMapper;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.CrossCoreGateway;
-import uk.gov.di.ipv.cri.experian.gateway.crosscore.dto.CrossCoreApiRequest;
-import uk.gov.di.ipv.cri.experian.security.HmacGenerator;
+import uk.gov.di.ipv.cri.experian.gateway.dto.CrossCoreApiRequest;
 
 import javax.net.ssl.SSLSession;
 import javax.servlet.http.HttpServletResponse;
