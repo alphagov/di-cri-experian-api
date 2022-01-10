@@ -1,14 +1,20 @@
 package uk.gov.di.ipv.cri.experian;
 
-public class App {
-    public static void main(String[] args) {
-        System.setProperty(
-                "javax.net.ssl.keyStore", System.getenv("EXPERIAN_CROSS_CORE_API_KEYSTORE_PATH"));
-        System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-        System.setProperty(
-                "javax.net.ssl.keyStorePassword",
-                System.getenv("EXPERIAN_CROSS_CORE_API_KEYSTORE_PASSWORD"));
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
 
-        new ExperianApi();
+public class App {
+    public static void main(String[] args) throws IOException {
+        String keystoreBase64 = System.getenv("KEYSTORE");
+        Path tempFile = Files.createTempFile(null, null);
+        Files.write(tempFile, Base64.getDecoder().decode(keystoreBase64));
+        System.setProperty("javax.net.ssl.keyStore", tempFile.toString());
+
+        System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+        System.setProperty("javax.net.ssl.keyStorePassword", System.getenv("KEYSTORE_PASSWORD"));
+
+        new FraudApi();
     }
 }

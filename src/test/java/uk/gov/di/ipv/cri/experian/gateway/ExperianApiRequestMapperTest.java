@@ -13,22 +13,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.di.ipv.cri.experian.util.TestDataCreator.createTestPersonIdentity;
 
-class CrossCoreApiRequestMapperTest {
+class ExperianApiRequestMapperTest {
 
     private static final String TENANT_ID = "tenant-id";
-    private CrossCoreApiRequestMapper crossCoreApiRequestMapper;
+    private ExperianApiRequestMapper experianApiRequestMapper;
     private PersonIdentity personIdentity;
 
     @BeforeEach
     void setup() {
-        crossCoreApiRequestMapper = new CrossCoreApiRequestMapper(TENANT_ID);
+        experianApiRequestMapper = new ExperianApiRequestMapper(TENANT_ID);
     }
 
     @Test
     void shouldConvertPersonIdentityToCrossCoreApiRequestForCurrentAddress() {
         personIdentity = createTestPersonIdentity(AddressType.CURRENT);
 
-        CrossCoreApiRequest result = crossCoreApiRequestMapper.mapPersonIdentity(personIdentity);
+        CrossCoreApiRequest result = experianApiRequestMapper.mapPersonIdentity(personIdentity);
 
         assertNotNull(result);
         assertEquals(
@@ -75,7 +75,7 @@ class CrossCoreApiRequestMapperTest {
     void shouldConvertPersonIdentityToCrossCoreApiRequestForPreviousAddress() {
         personIdentity = createTestPersonIdentity(AddressType.PREVIOUS);
 
-        CrossCoreApiRequest result = crossCoreApiRequestMapper.mapPersonIdentity(personIdentity);
+        CrossCoreApiRequest result = experianApiRequestMapper.mapPersonIdentity(personIdentity);
 
         assertNotNull(result);
         assertEquals(
@@ -123,7 +123,7 @@ class CrossCoreApiRequestMapperTest {
         NullPointerException exception =
                 assertThrows(
                         NullPointerException.class,
-                        () -> crossCoreApiRequestMapper.mapPersonIdentity(personIdentity));
+                        () -> experianApiRequestMapper.mapPersonIdentity(personIdentity));
         assertEquals("The personIdentity must not be null", exception.getMessage());
     }
 }

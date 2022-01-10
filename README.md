@@ -6,14 +6,14 @@
 
 Environment variables:
 ````
-export EXPERIAN_CROSS_CORE_API_TENANT_ID=
-export EXPERIAN_CROSS_CORE_API_ENDPOINT_URI=
-export EXPERIAN_CROSS_CORE_API_HMAC_KEY=
-export EXPERIAN_CROSS_CORE_API_KEYSTORE_PATH=
-export EXPERIAN_CROSS_CORE_API_KEYSTORE_PASSWORD=
+export EXPERIAN_API_TENANT_ID=
+export EXPERIAN_API_ENDPOINT_URI=
+export EXPERIAN_API_HMAC_KEY=
+export KEYSTORE_PATH=
+export KEYSTORE_PASSWORD=
 ````
 
-Execute: `cd experian-api && ../gradlew run` to build and run the project
+Execute: `./gradlew run` to build and run the project
 
 Sample request:
 ````

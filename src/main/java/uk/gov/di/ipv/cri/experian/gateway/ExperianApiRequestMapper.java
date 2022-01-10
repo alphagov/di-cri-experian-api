@@ -24,11 +24,11 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CrossCoreApiRequestMapper {
+public class ExperianApiRequestMapper {
 
     private final String tenantId;
 
-    public CrossCoreApiRequestMapper(String tenantId) {
+    public ExperianApiRequestMapper(String tenantId) {
         this.tenantId = tenantId;
     }
 

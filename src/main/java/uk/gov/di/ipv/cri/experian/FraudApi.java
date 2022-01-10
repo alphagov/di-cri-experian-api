@@ -3,9 +3,9 @@ package uk.gov.di.ipv.cri.experian;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import spark.Spark;
-import uk.gov.di.ipv.cri.experian.config.CrossCoreApiConfig;
-import uk.gov.di.ipv.cri.experian.gateway.CrossCoreApiRequestMapper;
-import uk.gov.di.ipv.cri.experian.gateway.CrossCoreGateway;
+import uk.gov.di.ipv.cri.experian.config.ExperianApiConfig;
+import uk.gov.di.ipv.cri.experian.gateway.ExperianApiRequestMapper;
+import uk.gov.di.ipv.cri.experian.gateway.ExperianGateway;
 import uk.gov.di.ipv.cri.experian.gateway.HmacGenerator;
 import uk.gov.di.ipv.cri.experian.resource.HealthCheckResource;
 import uk.gov.di.ipv.cri.experian.resource.IdentityCheckResource;
@@ -21,11 +21,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 
-public class ExperianApi {
+public class FraudApi {
     private final IdentityCheckResource identityCheckResource;
     private final HealthCheckResource healthCheckResource;
 
-    public ExperianApi() {
+    public FraudApi() {
         try {
             Spark.port(5007);
 
@@ -62,18 +62,18 @@ public class ExperianApi {
 
     private IdentityVerificationService createIdentityVerificationService(ObjectMapper objectMapper)
             throws NoSuchAlgorithmException, InvalidKeyException {
-        CrossCoreApiConfig experianCrossCoreApiConfig = new CrossCoreApiConfig();
+        ExperianApiConfig experianExperianApiConfig = new ExperianApiConfig();
         HttpClient httpClient = createCrossCoreHttpClient();
-        HmacGenerator hmacGenerator = new HmacGenerator(experianCrossCoreApiConfig.getHmacKey());
-        CrossCoreApiRequestMapper apiRequestMapper =
-                new CrossCoreApiRequestMapper(experianCrossCoreApiConfig.getTenantId());
-        CrossCoreGateway crossCoreGateway =
-                new CrossCoreGateway(
+        HmacGenerator hmacGenerator = new HmacGenerator(experianExperianApiConfig.getHmacKey());
+        ExperianApiRequestMapper apiRequestMapper =
+                new ExperianApiRequestMapper(experianExperianApiConfig.getTenantId());
+        ExperianGateway experianGateway =
+                new ExperianGateway(
                         httpClient,
                         apiRequestMapper,
                         objectMapper,
                         hmacGenerator,
-                        experianCrossCoreApiConfig);
-        return new IdentityVerificationService(crossCoreGateway);
+                        experianExperianApiConfig);
+        return new IdentityVerificationService(experianGateway);
     }
 }

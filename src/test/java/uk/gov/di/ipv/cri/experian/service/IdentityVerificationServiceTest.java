@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
-import uk.gov.di.ipv.cri.experian.gateway.CrossCoreGateway;
+import uk.gov.di.ipv.cri.experian.gateway.ExperianGateway;
 
 import java.io.IOException;
 
@@ -20,30 +20,30 @@ import static uk.gov.di.ipv.cri.experian.util.TestDataCreator.createTestPersonId
 class IdentityVerificationServiceTest {
 
     private IdentityVerificationService identityVerificationService;
-    @Mock private CrossCoreGateway mockCrossCoreGateway;
+    @Mock private ExperianGateway mockExperianGateway;
 
     @BeforeEach
     void setUp() {
-        this.identityVerificationService = new IdentityVerificationService(mockCrossCoreGateway);
+        this.identityVerificationService = new IdentityVerificationService(mockExperianGateway);
     }
 
     @Test
     void shouldInvokeTheCrossCoreGateway() throws IOException, InterruptedException {
         final String identityCheckResult = "identity-check-response";
         PersonIdentity testPersonIdentity = createTestPersonIdentity();
-        when(this.mockCrossCoreGateway.performIdentityCheck(testPersonIdentity))
+        when(this.mockExperianGateway.performIdentityCheck(testPersonIdentity))
                 .thenReturn(identityCheckResult);
 
         String result = this.identityVerificationService.verifyIdentity(testPersonIdentity);
 
-        verify(mockCrossCoreGateway).performIdentityCheck(testPersonIdentity);
+        verify(mockExperianGateway).performIdentityCheck(testPersonIdentity);
         assertEquals(identityCheckResult, result);
     }
 
     @Test
     void shouldReturnNullWhenAnExceptionOccurs() throws IOException, InterruptedException {
         PersonIdentity testPersonIdentity = createTestPersonIdentity();
-        when(this.mockCrossCoreGateway.performIdentityCheck(testPersonIdentity))
+        when(this.mockExperianGateway.performIdentityCheck(testPersonIdentity))
                 .thenThrow(new IOException());
 
         String result = this.identityVerificationService.verifyIdentity(testPersonIdentity);

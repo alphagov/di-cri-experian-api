@@ -3,19 +3,19 @@ package uk.gov.di.ipv.cri.experian.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
-import uk.gov.di.ipv.cri.experian.gateway.CrossCoreGateway;
+import uk.gov.di.ipv.cri.experian.gateway.ExperianGateway;
 
 public class IdentityVerificationService {
-    private final CrossCoreGateway crossCoreGateway;
+    private final ExperianGateway experianGateway;
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityVerificationService.class);
 
-    public IdentityVerificationService(CrossCoreGateway crossCoreGateway) {
-        this.crossCoreGateway = crossCoreGateway;
+    public IdentityVerificationService(ExperianGateway experianGateway) {
+        this.experianGateway = experianGateway;
     }
 
     public String verifyIdentity(PersonIdentity personIdentity) {
         try {
-            return crossCoreGateway.performIdentityCheck(personIdentity);
+            return experianGateway.performIdentityCheck(personIdentity);
         } catch (InterruptedException ie) {
             LOGGER.error("Error occurred when attempting to invoke experian api", ie);
             Thread.currentThread().interrupt();

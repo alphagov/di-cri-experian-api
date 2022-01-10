@@ -1,7 +1,7 @@
 package uk.gov.di.ipv.cri.experian.gateway;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.di.ipv.cri.experian.config.CrossCoreApiConfig;
+import uk.gov.di.ipv.cri.experian.config.ExperianApiConfig;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
 import uk.gov.di.ipv.cri.experian.gateway.dto.CrossCoreApiRequest;
 
@@ -12,31 +12,31 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Objects;
 
-public class CrossCoreGateway {
+public class ExperianGateway {
 
     private final HttpClient httpClient;
-    private final CrossCoreApiRequestMapper requestMapper;
+    private final ExperianApiRequestMapper requestMapper;
     private final ObjectMapper objectMapper;
     private final HmacGenerator hmacGenerator;
-    private final CrossCoreApiConfig crossCoreApiConfig;
+    private final ExperianApiConfig experianApiConfig;
 
-    public CrossCoreGateway(
+    public ExperianGateway(
             HttpClient httpClient,
-            CrossCoreApiRequestMapper requestMapper,
+            ExperianApiRequestMapper requestMapper,
             ObjectMapper objectMapper,
             HmacGenerator hmacGenerator,
-            CrossCoreApiConfig crossCoreApiConfig) {
+            ExperianApiConfig experianApiConfig) {
         Objects.requireNonNull(httpClient, "httpClient must not be null");
         Objects.requireNonNull(requestMapper, "requestMapper must not be null");
         Objects.requireNonNull(objectMapper, "objectMapper must not be null");
         Objects.requireNonNull(hmacGenerator, "hmacGenerator must not be null");
-        Objects.requireNonNull(crossCoreApiConfig, "crossCoreApiConfig must not be null");
+        Objects.requireNonNull(experianApiConfig, "crossCoreApiConfig must not be null");
 
         this.httpClient = httpClient;
         this.requestMapper = requestMapper;
         this.objectMapper = objectMapper;
         this.hmacGenerator = hmacGenerator;
-        this.crossCoreApiConfig = crossCoreApiConfig;
+        this.experianApiConfig = experianApiConfig;
     }
 
     public String performIdentityCheck(PersonIdentity personIdentity)
@@ -46,7 +46,7 @@ public class CrossCoreGateway {
         String requestBodyHmac = hmacGenerator.generateHmac(requestBody);
         HttpRequest request =
                 HttpRequest.newBuilder()
-                        .uri(URI.create(crossCoreApiConfig.getEndpointUri()))
+                        .uri(URI.create(experianApiConfig.getEndpointUri()))
                         .setHeader("Accept", "application/json")
                         .setHeader("Content-Type", "application/json")
                         .setHeader("hmac-signature", requestBodyHmac)

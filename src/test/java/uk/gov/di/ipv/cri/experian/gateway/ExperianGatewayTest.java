@@ -8,7 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.ipv.cri.experian.config.CrossCoreApiConfig;
+import uk.gov.di.ipv.cri.experian.config.ExperianApiConfig;
 import uk.gov.di.ipv.cri.experian.domain.AddressType;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
 import uk.gov.di.ipv.cri.experian.gateway.dto.CrossCoreApiRequest;
@@ -34,48 +34,48 @@ import static org.mockito.Mockito.when;
 import static uk.gov.di.ipv.cri.experian.util.TestDataCreator.createTestPersonIdentity;
 
 @ExtendWith(MockitoExtension.class)
-class CrossCoreGatewayTest {
+class ExperianGatewayTest {
 
     private class CrossCoreGatewayConstructorArgs {
         private final HttpClient httpClient;
-        private final CrossCoreApiRequestMapper requestMapper;
+        private final ExperianApiRequestMapper requestMapper;
         private final ObjectMapper objectMapper;
         private final HmacGenerator hmacGenerator;
-        private final CrossCoreApiConfig crossCoreApiConfig;
+        private final ExperianApiConfig experianApiConfig;
 
         private CrossCoreGatewayConstructorArgs(
                 HttpClient httpClient,
-                CrossCoreApiRequestMapper requestMapper,
+                ExperianApiRequestMapper requestMapper,
                 ObjectMapper objectMapper,
                 HmacGenerator hmacGenerator,
-                CrossCoreApiConfig crossCoreApiConfig) {
+                ExperianApiConfig experianApiConfig) {
 
             this.httpClient = httpClient;
             this.requestMapper = requestMapper;
             this.objectMapper = objectMapper;
             this.hmacGenerator = hmacGenerator;
-            this.crossCoreApiConfig = crossCoreApiConfig;
+            this.experianApiConfig = experianApiConfig;
         }
     }
 
     private static final String TEST_API_RESPONSE_BODY = "test-api-response-content";
-    private CrossCoreGateway crossCoreGateway;
+    private ExperianGateway experianGateway;
 
     @Mock private HttpClient mockHttpClient;
-    @Mock private CrossCoreApiRequestMapper mockRequestMapper;
+    @Mock private ExperianApiRequestMapper mockRequestMapper;
     @Mock private ObjectMapper mockObjectMapper;
     @Mock private HmacGenerator mockHmacGenerator;
-    @Mock private CrossCoreApiConfig mockCrossCoreApiConfig;
+    @Mock private ExperianApiConfig mockExperianApiConfig;
 
     @BeforeEach
     void setUp() {
-        this.crossCoreGateway =
-                new CrossCoreGateway(
+        this.experianGateway =
+                new ExperianGateway(
                         mockHttpClient,
                         mockRequestMapper,
                         mockObjectMapper,
                         mockHmacGenerator,
-                        mockCrossCoreApiConfig);
+                        mockExperianApiConfig);
     }
 
     @Test
@@ -86,7 +86,7 @@ class CrossCoreGatewayTest {
         final String hmacOfRequestBody = "hmac-of-request-body";
         PersonIdentity personIdentity = createTestPersonIdentity(AddressType.CURRENT);
         when(mockRequestMapper.mapPersonIdentity(personIdentity)).thenReturn(testApiRequest);
-        when(this.mockCrossCoreApiConfig.getEndpointUri()).thenReturn(testEndpointUri);
+        when(this.mockExperianApiConfig.getEndpointUri()).thenReturn(testEndpointUri);
         when(this.mockObjectMapper.writeValueAsString(testApiRequest)).thenReturn(testRequestBody);
         when(this.mockHmacGenerator.generateHmac(testRequestBody)).thenReturn(hmacOfRequestBody);
         ArgumentCaptor<HttpRequest> httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
@@ -94,13 +94,13 @@ class CrossCoreGatewayTest {
                         httpRequestCaptor.capture(), eq(HttpResponse.BodyHandlers.ofString())))
                 .thenReturn(createMockApiResponse());
 
-        String identityCheckResult = crossCoreGateway.performIdentityCheck(personIdentity);
+        String identityCheckResult = experianGateway.performIdentityCheck(personIdentity);
 
         assertEquals(TEST_API_RESPONSE_BODY, identityCheckResult);
         verify(mockRequestMapper).mapPersonIdentity(personIdentity);
         verify(mockObjectMapper).writeValueAsString(testApiRequest);
         verify(mockHmacGenerator).generateHmac(testRequestBody);
-        verify(mockCrossCoreApiConfig).getEndpointUri();
+        verify(mockExperianApiConfig).getEndpointUri();
         verify(mockHttpClient)
                 .send(any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()));
         assertEquals(testEndpointUri, httpRequestCaptor.getValue().uri().toString());
@@ -125,21 +125,21 @@ class CrossCoreGatewayTest {
                         "objectMapper must not be null",
                         new CrossCoreGatewayConstructorArgs(
                                 Mockito.mock(HttpClient.class),
-                                Mockito.mock(CrossCoreApiRequestMapper.class),
+                                Mockito.mock(ExperianApiRequestMapper.class),
                                 null,
                                 null,
                                 null),
                         "hmacGenerator must not be null",
                         new CrossCoreGatewayConstructorArgs(
                                 Mockito.mock(HttpClient.class),
-                                Mockito.mock(CrossCoreApiRequestMapper.class),
+                                Mockito.mock(ExperianApiRequestMapper.class),
                                 Mockito.mock(ObjectMapper.class),
                                 null,
                                 null),
                         "crossCoreApiConfig must not be null",
                         new CrossCoreGatewayConstructorArgs(
                                 Mockito.mock(HttpClient.class),
-                                Mockito.mock(CrossCoreApiRequestMapper.class),
+                                Mockito.mock(ExperianApiRequestMapper.class),
                                 Mockito.mock(ObjectMapper.class),
                                 Mockito.mock(HmacGenerator.class),
                                 null));
@@ -149,12 +149,12 @@ class CrossCoreGatewayTest {
                     assertThrows(
                             NullPointerException.class,
                             () -> {
-                                new CrossCoreGateway(
+                                new ExperianGateway(
                                         constructorArgs.httpClient,
                                         constructorArgs.requestMapper,
                                         constructorArgs.objectMapper,
                                         constructorArgs.hmacGenerator,
-                                        constructorArgs.crossCoreApiConfig);
+                                        constructorArgs.experianApiConfig);
                             },
                             errorMessage);
                 });
