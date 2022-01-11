@@ -1,0 +1,12 @@
+---
+applications:
+  - name: di-cri-experian-fraud-api
+    routes:
+      - route: di-cri-experian-fraud-api.apps.internal
+    path: build/libs/di-cri-experian-fraud-api.jar
+    memory: 256M
+    buildpack: java_buildpack
+    env:
+      JAVA_HOME: "../.java-buildpack/open_jdk_jre"
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}, memory_calculator: {stack_threads: 200}}'
+      JAVA_OPTS: '-Xss200k -XX:ReservedCodeCacheSize=50M -XX:MaxMetaspaceSize=100M'
