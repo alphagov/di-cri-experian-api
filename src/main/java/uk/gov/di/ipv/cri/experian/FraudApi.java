@@ -20,6 +20,7 @@ import java.net.http.HttpClient;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.Optional;
 
 public class FraudApi {
     private final IdentityCheckResource identityCheckResource;
@@ -27,7 +28,10 @@ public class FraudApi {
 
     public FraudApi() {
         try {
-            Spark.port(5007);
+            String portString =
+                    Optional.ofNullable(System.getenv().get("EXPERIAN_FRAUD_API_PORT"))
+                            .orElse("8080");
+            Spark.port(Integer.valueOf(portString));
 
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());

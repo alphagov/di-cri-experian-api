@@ -3,9 +3,10 @@ applications:
   - name: di-cri-experian-fraud-api
     routes:
       - route: di-cri-experian-fraud-api.apps.internal
-    path: build/libs/di-cri-experian-fraud-api.jar
+    path: build/distributions/di-cri-experian-fraud-api.zip
     memory: 256M
     buildpack: java_buildpack
+    command: cd di-cri-experian-fraud-api && bin/di-cri-experian-fraud-api
     env:
       JAVA_HOME: "../.java-buildpack/open_jdk_jre"
       JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}, memory_calculator: {stack_threads: 200}}'
