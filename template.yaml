@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  di-cri-experian-fraud-api
+  SAM Template for the experian fraud api
+
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  IdentityCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: uk.gov.di.ipv.cri.experian.handler.IdentityCheckHandler::handleRequest
+      Runtime: java11
+      MemorySize: 512
+      Environment:
+        Variables:
+          EXPERIAN_API_TENANT_ID: ${EXPERIAN_API_TENANT_ID}
+          EXPERIAN_API_ENDPOINT_URI: ${EXPERIAN_API_ENDPOINT_URI}
+          EXPERIAN_API_HMAC_KEY: ${EXPERIAN_API_HMAC_KEY}
+          KEYSTORE_PASSWORD: ${KEYSTORE_PASSWORD}
+          KEYSTORE: ${KEYSTORE}
+      Events:
+        CreateIdentityCheck:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /identity-check
+            Method: post
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  IdentityCheckApi:
+    Description: "API Gateway endpoint URL for Prod stage for IdentityCheck function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/identity-check/"
+  IdentityCheckFunction:
+    Description: "Identity check lambda function ARN"
+    Value: !GetAtt IdentityCheckFunction.Arn
+  IdentityCheckFunctionIamRole:
+    Description: "Implicit IAM Role created for identiy check function"
+    Value: !GetAtt IdentityCheckFunction.Arn

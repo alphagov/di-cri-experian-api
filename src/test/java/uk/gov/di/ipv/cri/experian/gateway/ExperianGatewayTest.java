@@ -14,7 +14,6 @@ import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
 import uk.gov.di.ipv.cri.experian.gateway.dto.CrossCoreApiRequest;
 
 import javax.net.ssl.SSLSession;
-import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,14 +35,14 @@ import static uk.gov.di.ipv.cri.experian.util.TestDataCreator.createTestPersonId
 @ExtendWith(MockitoExtension.class)
 class ExperianGatewayTest {
 
-    private class CrossCoreGatewayConstructorArgs {
+    private static class ExperianGatewayConstructorArgs {
         private final HttpClient httpClient;
         private final ExperianApiRequestMapper requestMapper;
         private final ObjectMapper objectMapper;
         private final HmacGenerator hmacGenerator;
         private final ExperianApiConfig experianApiConfig;
 
-        private CrossCoreGatewayConstructorArgs(
+        private ExperianGatewayConstructorArgs(
                 HttpClient httpClient,
                 ExperianApiRequestMapper requestMapper,
                 ObjectMapper objectMapper,
@@ -115,29 +114,29 @@ class ExperianGatewayTest {
 
     @Test
     void shouldThrowNullPointerExceptionWhenInvalidConstructorArgumentsProvided() {
-        Map<String, CrossCoreGatewayConstructorArgs> testCases =
+        Map<String, ExperianGatewayConstructorArgs> testCases =
                 Map.of(
                         "httpClient must not be null",
-                        new CrossCoreGatewayConstructorArgs(null, null, null, null, null),
+                        new ExperianGatewayConstructorArgs(null, null, null, null, null),
                         "requestMapper must not be null",
-                        new CrossCoreGatewayConstructorArgs(
+                        new ExperianGatewayConstructorArgs(
                                 Mockito.mock(HttpClient.class), null, null, null, null),
                         "objectMapper must not be null",
-                        new CrossCoreGatewayConstructorArgs(
+                        new ExperianGatewayConstructorArgs(
                                 Mockito.mock(HttpClient.class),
                                 Mockito.mock(ExperianApiRequestMapper.class),
                                 null,
                                 null,
                                 null),
                         "hmacGenerator must not be null",
-                        new CrossCoreGatewayConstructorArgs(
+                        new ExperianGatewayConstructorArgs(
                                 Mockito.mock(HttpClient.class),
                                 Mockito.mock(ExperianApiRequestMapper.class),
                                 Mockito.mock(ObjectMapper.class),
                                 null,
                                 null),
                         "crossCoreApiConfig must not be null",
-                        new CrossCoreGatewayConstructorArgs(
+                        new ExperianGatewayConstructorArgs(
                                 Mockito.mock(HttpClient.class),
                                 Mockito.mock(ExperianApiRequestMapper.class),
                                 Mockito.mock(ObjectMapper.class),
@@ -145,26 +144,24 @@ class ExperianGatewayTest {
                                 null));
 
         testCases.forEach(
-                (errorMessage, constructorArgs) -> {
-                    assertThrows(
-                            NullPointerException.class,
-                            () -> {
-                                new ExperianGateway(
-                                        constructorArgs.httpClient,
-                                        constructorArgs.requestMapper,
-                                        constructorArgs.objectMapper,
-                                        constructorArgs.hmacGenerator,
-                                        constructorArgs.experianApiConfig);
-                            },
-                            errorMessage);
-                });
+                (errorMessage, constructorArgs) ->
+                        assertThrows(
+                                NullPointerException.class,
+                                () ->
+                                        new ExperianGateway(
+                                                constructorArgs.httpClient,
+                                                constructorArgs.requestMapper,
+                                                constructorArgs.objectMapper,
+                                                constructorArgs.hmacGenerator,
+                                                constructorArgs.experianApiConfig),
+                                errorMessage));
     }
 
     private HttpResponse<String> createMockApiResponse() {
         return new HttpResponse<>() {
             @Override
             public int statusCode() {
-                return HttpServletResponse.SC_OK;
+                return 200;
             }
 
             @Override

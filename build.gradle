@@ -16,7 +16,8 @@ repositories {
 sourceCompatibility = 11
 
 dependencies {
-	implementation "com.sparkjava:spark-core:2.9.3",
+	implementation "com.amazonaws:aws-lambda-java-core:1.2.1",
+			"com.amazonaws:aws-lambda-java-events:3.11.0",
 			"com.fasterxml.jackson.core:jackson-databind:2.13.0",
 			"com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0",
 			"org.slf4j:slf4j-simple:1.7.32",
@@ -73,5 +74,3 @@ sonarqube {
 		property "sonar.host.url", "https://sonarcloud.io"
 	}
 }
-
-mainClassName = "uk.gov.di.ipv.cri.experian.App"
