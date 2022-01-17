@@ -5,6 +5,9 @@ Description: >
   SAM Template for the experian fraud api
 
 Globals:
+  Api:
+    Auth:
+      DefaultAuthorizer: AWS_IAM
   Function:
     Timeout: 20
 
@@ -14,7 +17,21 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: uk.gov.di.ipv.cri.experian.handler.IdentityCheckHandler::handleRequest
-      Role: !GetAtt IdentityCheckFunctionRoleDev.Arn
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSXrayWriteOnlyAccess
+        - Statement:
+          - Sid: ReadParameterStorePolicy
+            Effect: Allow
+            Action:
+              - 'ssm:GetParameter*'
+            Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/dev/di-cri-experian-fraud-api*'
+        - Statement:
+          - Sid: ReadSecretsPolicy
+            Effect: Allow
+            Action:
+              - 'secretsmanager:GetSecretValue'
+            Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/dev/di-cri-experian-fraud-api*'
       Runtime: java11
       MemorySize: 512
       Environment:
@@ -26,58 +43,10 @@ Resources:
           KEYSTORE: ${KEYSTORE}
       Events:
         CreateIdentityCheck:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /identity-check
             Method: post
-
-  IdentityCheckFunctionRoleDev:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          -
-            Effect: Allow
-            Principal:
-              Service:
-                - 'lambda.amazonaws.com'
-            Action:
-              - 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
-      Policies:
-        -
-          PolicyName: 'IdentityCheckFunctionDevParameterAccess'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              -
-                Effect: Allow
-                Action:
-                  - 'ssm:GetParameter*'
-                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/dev/di-cri-experian-fraud-api*'
-        -
-          PolicyName: 'IdentityCheckFunctionDevSecretAccess'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              -
-                Effect: Allow
-                Action:
-                  - 'secretsmanager:GetSecretValue'
-                Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/dev/di-cri-experian-fraud-api*'
-        -
-          PolicyName: 'IdentityCheckFunctionDevXRayAccess'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              -
-                Effect: Allow
-                Action:
-                  - 'xray:PutTraceSegments'
-                  - 'xray:PutTelemetryRecords'
-                Resource: '*'
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -89,6 +58,6 @@ Outputs:
   IdentityCheckFunction:
     Description: "Identity check lambda function ARN"
     Value: !GetAtt IdentityCheckFunction.Arn
-#  IdentityCheckFunctionIamRole:
-#    Description: "Implicit IAM Role created for identity check function"
-#    Value: !GetAtt IdentityCheckFunction.Arn
+  IdentityCheckFunctionIamRole:
+    Description: "Implicit IAM Role created for identity check function"
+    Value: !GetAtt IdentityCheckFunction.Arn

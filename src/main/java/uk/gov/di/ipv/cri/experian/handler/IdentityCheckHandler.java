@@ -107,6 +107,7 @@ public class IdentityCheckHandler
 
             return createResponseEvent(responseStatusCode, responseBody, responseHeaders);
         } catch (Exception e) {
+            context.getLogger().log("Error when attempting to invoke external api: " + e);
             LOGGER.error("Error handling request", e);
             return createResponseEvent(
                     INTERNAL_SERVER_ERROR_STATUS_CODE, "An error occurred", responseHeaders);
