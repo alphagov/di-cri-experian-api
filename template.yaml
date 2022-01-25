@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  di-cri-experian-fraud-api
+  di-ipv-cri-experian-fraud-api
   SAM Template for the experian fraud api
 
 Globals:
@@ -9,7 +9,13 @@ Globals:
     Auth:
       DefaultAuthorizer: AWS_IAM
   Function:
-    Timeout: 20
+    Timeout: 30
+    Runtime: java11
+    VpcConfig:
+      SecurityGroupIds:
+        - sg-TBD
+      SubnetIds:
+        - subnet-TBD
 
 Resources:
   IdentityCheckFunction:
@@ -32,15 +38,11 @@ Resources:
             Action:
               - 'secretsmanager:GetSecretValue'
             Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/dev/di-cri-experian-fraud-api*'
-      Runtime: java11
       MemorySize: 512
       Environment:
         Variables:
           EXPERIAN_API_TENANT_ID: ${EXPERIAN_API_TENANT_ID}
           EXPERIAN_API_ENDPOINT_URI: ${EXPERIAN_API_ENDPOINT_URI}
-          EXPERIAN_API_HMAC_KEY: ${EXPERIAN_API_HMAC_KEY}
-          KEYSTORE_PASSWORD: ${KEYSTORE_PASSWORD}
-          KEYSTORE: ${KEYSTORE}
       Events:
         CreateIdentityCheck:
           Type: Api

@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.lambda.powertools.parameters.ParamManager;
 import software.amazon.lambda.powertools.parameters.SecretsProvider;
+import software.amazon.lambda.powertools.tracing.CaptureMode;
+import software.amazon.lambda.powertools.tracing.Tracing;
 import uk.gov.di.ipv.cri.experian.config.ExperianApiConfig;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
 import uk.gov.di.ipv.cri.experian.domain.ValidationResult;
@@ -32,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Objects;
 
 public class IdentityCheckHandler
         implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -83,10 +86,13 @@ public class IdentityCheckHandler
         this.inputValidationExecutor = inputValidationExecutor;
     }
 
+    @Tracing(captureMode = CaptureMode.DISABLED)
     @Override
     public APIGatewayProxyResponseEvent handleRequest(
             APIGatewayProxyRequestEvent input, Context context) {
         Map<String, String> responseHeaders = Map.of("Content-Type", "application/json");
+        String responseBody;
+        int responseStatusCode;
 
         try {
             PersonIdentity personIdentity =
@@ -94,24 +100,24 @@ public class IdentityCheckHandler
             ValidationResult validationResult =
                     this.inputValidationExecutor.performInputValidation(personIdentity);
 
-            String responseBody;
-            int responseStatusCode;
-
             if (validationResult.isValid()) {
                 responseStatusCode = CREATED_HTTP_STATUS_CODE;
                 responseBody = this.identityVerificationService.verifyIdentity(personIdentity);
+                if (Objects.isNull(responseBody)) {
+                    responseStatusCode = INTERNAL_SERVER_ERROR_STATUS_CODE;
+                    responseBody = "{}";
+                }
             } else {
                 responseStatusCode = BAD_REQUEST_HTTP_STATUS_CODE;
                 responseBody = objectMapper.writeValueAsString(validationResult);
             }
-
-            return createResponseEvent(responseStatusCode, responseBody, responseHeaders);
         } catch (Exception e) {
-            context.getLogger().log("Error when attempting to invoke external api: " + e);
             LOGGER.error("Error handling request", e);
-            return createResponseEvent(
-                    INTERNAL_SERVER_ERROR_STATUS_CODE, "An error occurred", responseHeaders);
+            responseStatusCode = INTERNAL_SERVER_ERROR_STATUS_CODE;
+            responseBody = "{\"error\": \"" + e.getMessage() + "\"}";
         }
+
+        return createResponseEvent(responseStatusCode, responseBody, responseHeaders);
     }
 
     private IdentityVerificationService createIdentityVerificationService(ObjectMapper objectMapper)
@@ -119,7 +125,7 @@ public class IdentityCheckHandler
         ExperianApiConfig experianExperianApiConfig =
                 new ExperianApiConfig(ParamManager.getSsmProvider(), SECRETS_PROVIDER);
         HttpClient httpClient =
-                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build();
+                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
         HmacGenerator hmacGenerator = new HmacGenerator(experianExperianApiConfig.getHmacKey());
         ExperianApiRequestMapper apiRequestMapper =
                 new ExperianApiRequestMapper(experianExperianApiConfig.getTenantId());
