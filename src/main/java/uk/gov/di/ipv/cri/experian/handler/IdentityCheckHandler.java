@@ -21,6 +21,7 @@ import uk.gov.di.ipv.cri.experian.gateway.HmacGenerator;
 import uk.gov.di.ipv.cri.experian.service.IdentityVerificationService;
 import uk.gov.di.ipv.cri.experian.validation.InputValidationExecutor;
 
+import javax.net.ssl.SSLContext;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
@@ -48,24 +49,6 @@ public class IdentityCheckHandler
     private final IdentityVerificationService identityVerificationService;
     private final ObjectMapper objectMapper;
     private final InputValidationExecutor inputValidationExecutor;
-
-    static {
-        try {
-            String keystoreBase64 =
-                    SECRETS_PROVIDER.get("/dev/di-cri-experian-fraud-api/experian-api");
-            Path tempFile = Files.createTempFile(null, null);
-            Files.write(tempFile, Base64.getDecoder().decode(keystoreBase64));
-
-            System.setProperty("javax.net.ssl.keyStore", tempFile.toString());
-            System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
-            System.setProperty(
-                    "javax.net.ssl.keyStorePassword",
-                    SECRETS_PROVIDER.get(
-                            "/dev/di-cri-experian-fraud-api/experian-api-keystore-password"));
-        } catch (IOException e) {
-            LOGGER.error("Static initialisation failed", e);
-        }
-    }
 
     public IdentityCheckHandler() throws NoSuchAlgorithmException, InvalidKeyException {
         this.objectMapper = new ObjectMapper();
@@ -120,12 +103,35 @@ public class IdentityCheckHandler
         return createResponseEvent(responseStatusCode, responseBody, responseHeaders);
     }
 
+    private SSLContext createSslContext() {
+        try {
+            String keystoreBase64 =
+                    SECRETS_PROVIDER.get("/dev/di-cri-experian-fraud-api/experian-api");
+            Path tempFile = Files.createTempFile(null, null);
+            Files.write(tempFile, Base64.getDecoder().decode(keystoreBase64));
+            SSLContextFactory sslContextFactory = new SSLContextFactory();
+            return sslContextFactory.getSSLContext(
+                    tempFile.toString(),
+                    SECRETS_PROVIDER.get(
+                            "/dev/di-cri-experian-fraud-api/experian-api-keystore-password"));
+        } catch (IOException e) {
+            LOGGER.error("An error occurred whilst creating the SSL context", e);
+            return null;
+        }
+    }
+
     private IdentityVerificationService createIdentityVerificationService(ObjectMapper objectMapper)
             throws NoSuchAlgorithmException, InvalidKeyException {
         ExperianApiConfig experianExperianApiConfig =
                 new ExperianApiConfig(ParamManager.getSsmProvider(), SECRETS_PROVIDER);
+
+        SSLContext sslContext = createSslContext();
         HttpClient httpClient =
-                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
+                HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(30))
+                        .sslContext(sslContext)
+                        .build();
+
         HmacGenerator hmacGenerator = new HmacGenerator(experianExperianApiConfig.getHmacKey());
         ExperianApiRequestMapper apiRequestMapper =
                 new ExperianApiRequestMapper(experianExperianApiConfig.getTenantId());
