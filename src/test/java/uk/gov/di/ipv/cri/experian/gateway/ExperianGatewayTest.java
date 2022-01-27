@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.ipv.cri.experian.config.ExperianApiConfig;
 import uk.gov.di.ipv.cri.experian.domain.AddressType;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
 import uk.gov.di.ipv.cri.experian.gateway.dto.CrossCoreApiRequest;
@@ -40,31 +39,31 @@ class ExperianGatewayTest {
         private final ExperianApiRequestMapper requestMapper;
         private final ObjectMapper objectMapper;
         private final HmacGenerator hmacGenerator;
-        private final ExperianApiConfig experianApiConfig;
+        private final String experianEndpointUrl;
 
         private ExperianGatewayConstructorArgs(
                 HttpClient httpClient,
                 ExperianApiRequestMapper requestMapper,
                 ObjectMapper objectMapper,
                 HmacGenerator hmacGenerator,
-                ExperianApiConfig experianApiConfig) {
+                String experianEndpointUrl) {
 
             this.httpClient = httpClient;
             this.requestMapper = requestMapper;
             this.objectMapper = objectMapper;
             this.hmacGenerator = hmacGenerator;
-            this.experianApiConfig = experianApiConfig;
+            this.experianEndpointUrl = experianEndpointUrl;
         }
     }
 
     private static final String TEST_API_RESPONSE_BODY = "test-api-response-content";
+    private static final String TEST_ENDPOINT_URL = "https://test-endpoint.co.uk";
     private ExperianGateway experianGateway;
 
     @Mock private HttpClient mockHttpClient;
     @Mock private ExperianApiRequestMapper mockRequestMapper;
     @Mock private ObjectMapper mockObjectMapper;
     @Mock private HmacGenerator mockHmacGenerator;
-    @Mock private ExperianApiConfig mockExperianApiConfig;
 
     @BeforeEach
     void setUp() {
@@ -74,18 +73,18 @@ class ExperianGatewayTest {
                         mockRequestMapper,
                         mockObjectMapper,
                         mockHmacGenerator,
-                        mockExperianApiConfig);
+                        TEST_ENDPOINT_URL);
     }
 
     @Test
     void shouldInvokeExperianApi() throws IOException, InterruptedException {
         final String testRequestBody = "serialisedCrossCoreApiRequest";
         final CrossCoreApiRequest testApiRequest = new CrossCoreApiRequest();
-        final String testEndpointUri = "https://test-endpoint";
+
         final String hmacOfRequestBody = "hmac-of-request-body";
         PersonIdentity personIdentity = createTestPersonIdentity(AddressType.CURRENT);
         when(mockRequestMapper.mapPersonIdentity(personIdentity)).thenReturn(testApiRequest);
-        when(this.mockExperianApiConfig.getEndpointUri()).thenReturn(testEndpointUri);
+
         when(this.mockObjectMapper.writeValueAsString(testApiRequest)).thenReturn(testRequestBody);
         when(this.mockHmacGenerator.generateHmac(testRequestBody)).thenReturn(hmacOfRequestBody);
         ArgumentCaptor<HttpRequest> httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
@@ -99,10 +98,10 @@ class ExperianGatewayTest {
         verify(mockRequestMapper).mapPersonIdentity(personIdentity);
         verify(mockObjectMapper).writeValueAsString(testApiRequest);
         verify(mockHmacGenerator).generateHmac(testRequestBody);
-        verify(mockExperianApiConfig).getEndpointUri();
+
         verify(mockHttpClient)
                 .send(any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString()));
-        assertEquals(testEndpointUri, httpRequestCaptor.getValue().uri().toString());
+        assertEquals(TEST_ENDPOINT_URL, httpRequestCaptor.getValue().uri().toString());
         assertEquals("POST", httpRequestCaptor.getValue().method());
         HttpHeaders capturedHttpRequestHeaders = httpRequestCaptor.getValue().headers();
         assertEquals("application/json", capturedHttpRequestHeaders.firstValue("Accept").get());
@@ -153,7 +152,7 @@ class ExperianGatewayTest {
                                                 constructorArgs.requestMapper,
                                                 constructorArgs.objectMapper,
                                                 constructorArgs.hmacGenerator,
-                                                constructorArgs.experianApiConfig),
+                                                constructorArgs.experianEndpointUrl),
                                 errorMessage));
     }
 

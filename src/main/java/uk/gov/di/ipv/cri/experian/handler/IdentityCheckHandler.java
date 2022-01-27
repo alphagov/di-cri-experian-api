@@ -8,32 +8,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.lambda.powertools.parameters.ParamManager;
-import software.amazon.lambda.powertools.parameters.SecretsProvider;
 import software.amazon.lambda.powertools.tracing.CaptureMode;
 import software.amazon.lambda.powertools.tracing.Tracing;
-import uk.gov.di.ipv.cri.experian.config.ExperianApiConfig;
 import uk.gov.di.ipv.cri.experian.domain.PersonIdentity;
 import uk.gov.di.ipv.cri.experian.domain.ValidationResult;
-import uk.gov.di.ipv.cri.experian.gateway.ExperianApiRequestMapper;
-import uk.gov.di.ipv.cri.experian.gateway.ExperianGateway;
-import uk.gov.di.ipv.cri.experian.gateway.HmacGenerator;
 import uk.gov.di.ipv.cri.experian.service.IdentityVerificationService;
+import uk.gov.di.ipv.cri.experian.service.ServiceFactory;
 import uk.gov.di.ipv.cri.experian.validation.InputValidationExecutor;
 
-import javax.net.ssl.SSLContext;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,36 +33,39 @@ public class IdentityCheckHandler
     private static final int CREATED_HTTP_STATUS_CODE = 201;
     private static final int INTERNAL_SERVER_ERROR_STATUS_CODE = 500;
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityCheckHandler.class);
-    private static final SecretsProvider SECRETS_PROVIDER = ParamManager.getSecretsProvider();
 
+    private final ServiceFactory serviceFactory;
     private final IdentityVerificationService identityVerificationService;
     private final ObjectMapper objectMapper;
     private final InputValidationExecutor inputValidationExecutor;
 
-    public IdentityCheckHandler() throws NoSuchAlgorithmException, InvalidKeyException {
+    public IdentityCheckHandler()
+            throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         this.inputValidationExecutor = new InputValidationExecutor(validator);
-        this.identityVerificationService = createIdentityVerificationService(objectMapper);
+        this.serviceFactory = new ServiceFactory(objectMapper);
+
+        this.identityVerificationService = this.serviceFactory.getIdentityVerificationService();
     }
 
-    public IdentityCheckHandler(
-            IdentityVerificationService identityVerificationService,
+    IdentityCheckHandler(
             ObjectMapper objectMapper,
-            InputValidationExecutor inputValidationExecutor) {
-        this.identityVerificationService = identityVerificationService;
+            InputValidationExecutor inputValidationExecutor,
+            ServiceFactory serviceFactory) {
         this.objectMapper = objectMapper;
         this.inputValidationExecutor = inputValidationExecutor;
+        this.serviceFactory = serviceFactory;
+        this.identityVerificationService = serviceFactory.getIdentityVerificationService();
     }
 
     @Tracing(captureMode = CaptureMode.DISABLED)
     @Override
     public APIGatewayProxyResponseEvent handleRequest(
             APIGatewayProxyRequestEvent input, Context context) {
-        Map<String, String> responseHeaders = Map.of("Content-Type", "application/json");
         String responseBody;
         int responseStatusCode;
 
@@ -100,56 +92,13 @@ public class IdentityCheckHandler
             responseBody = "{\"error\": \"" + e.getMessage() + "\"}";
         }
 
-        return createResponseEvent(responseStatusCode, responseBody, responseHeaders);
+        return createResponseEvent(responseStatusCode, responseBody);
     }
 
-    private SSLContext createSslContext() {
-        try {
-            String keystoreBase64 =
-                    SECRETS_PROVIDER.get("/dev/di-cri-experian-fraud-api/experian-api");
-            Path tempFile = Files.createTempFile(null, null);
-            Files.write(tempFile, Base64.getDecoder().decode(keystoreBase64));
-            SSLContextFactory sslContextFactory = new SSLContextFactory();
-            return sslContextFactory.getSSLContext(
-                    tempFile.toString(),
-                    SECRETS_PROVIDER.get(
-                            "/dev/di-cri-experian-fraud-api/experian-api-keystore-password"));
-        } catch (IOException e) {
-            LOGGER.error("An error occurred whilst creating the SSL context", e);
-            return null;
-        }
-    }
-
-    private IdentityVerificationService createIdentityVerificationService(ObjectMapper objectMapper)
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        ExperianApiConfig experianExperianApiConfig =
-                new ExperianApiConfig(ParamManager.getSsmProvider(), SECRETS_PROVIDER);
-
-        SSLContext sslContext = createSslContext();
-        HttpClient httpClient =
-                HttpClient.newBuilder()
-                        .connectTimeout(Duration.ofSeconds(30))
-                        .sslContext(sslContext)
-                        .build();
-
-        HmacGenerator hmacGenerator = new HmacGenerator(experianExperianApiConfig.getHmacKey());
-        ExperianApiRequestMapper apiRequestMapper =
-                new ExperianApiRequestMapper(experianExperianApiConfig.getTenantId());
-        ExperianGateway experianGateway =
-                new ExperianGateway(
-                        httpClient,
-                        apiRequestMapper,
-                        objectMapper,
-                        hmacGenerator,
-                        experianExperianApiConfig);
-        return new IdentityVerificationService(experianGateway);
-    }
-
-    private static APIGatewayProxyResponseEvent createResponseEvent(
-            int statusCode, String body, Map<String, String> headers) {
+    private static APIGatewayProxyResponseEvent createResponseEvent(int statusCode, String body) {
         APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent =
                 new APIGatewayProxyResponseEvent();
-        apiGatewayProxyResponseEvent.setHeaders(headers);
+        apiGatewayProxyResponseEvent.setHeaders(Map.of("Content-Type", "application/json"));
         apiGatewayProxyResponseEvent.setStatusCode(statusCode);
         apiGatewayProxyResponseEvent.setBody(body);
 

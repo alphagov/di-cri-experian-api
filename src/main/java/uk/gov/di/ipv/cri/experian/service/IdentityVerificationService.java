@@ -9,7 +9,7 @@ public class IdentityVerificationService {
     private final ExperianGateway experianGateway;
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityVerificationService.class);
 
-    public IdentityVerificationService(ExperianGateway experianGateway) {
+    IdentityVerificationService(ExperianGateway experianGateway) {
         this.experianGateway = experianGateway;
     }
 
