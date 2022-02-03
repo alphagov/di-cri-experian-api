@@ -2,10 +2,11 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = ""
-s3_bucket = ""
-s3_prefix = ""
+stack_name = "timp-di-cri-experian-fraud-api"
+s3_bucket = "ipv-kbv-lambda-artifact-bucket"
+s3_prefix = "timp-di-cri-experian-fraud-api"
 region = "eu-west-2"
-confirm_changeset = true
+confirm_changeset = false
+disable_rollback = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = []

@@ -60,6 +60,8 @@ Resources:
               - 'secretsmanager:GetSecretValue'
             Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/dev/di-cri-experian-fraud-api*'
       MemorySize: 512
+      CodeSigningConfigArn: !Ref IdentityCheckFunctionCodeSigning
+      AutoPublishAlias: latest
       Environment:
         Variables:
           EXPERIAN_API_TENANT_ID: !Ref ExperianTenantId
@@ -71,7 +73,15 @@ Resources:
           Properties:
             Path: /identity-check
             Method: post
-
+  IdentityCheckFunctionCodeSigning:
+    Type: AWS::Lambda::CodeSigningConfig
+    Properties:
+      Description: "Code Signing for IdentityCheckFunction"
+      AllowedPublishers:
+        SigningProfileVersionArns:
+          - "{{resolve:ssm:/dev/credentialIssuers/kbv/sam/signingProfileVersionArn}}"
+      CodeSigningPolicies:
+        UntrustedArtifactOnDeployment: "Enforce"
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
