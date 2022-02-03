@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Objects;
 
-public class IdentityCheckHandler
+public final class IdentityCheckHandler
         implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private static final int BAD_REQUEST_HTTP_STATUS_CODE = 400;

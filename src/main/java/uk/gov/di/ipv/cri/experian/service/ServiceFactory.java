@@ -10,12 +10,9 @@ import uk.gov.di.ipv.cri.experian.gateway.HmacGenerator;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.Base64;
 
 public class ServiceFactory {
     private final IdentityVerificationService identityVerificationService;
@@ -29,9 +26,10 @@ public class ServiceFactory {
         this.secretsProvider = ParamManager.getSecretsProvider();
         this.objectMapper = objectMapper;
         this.experianApiConfig = new ExperianApiConfig(this.secretsProvider);
-        String keyStorePath = persistKeystoreToFile();
         this.sslContextFactory =
-                new SSLContextFactory(keyStorePath, this.experianApiConfig.getKeyStorePassword());
+                new SSLContextFactory(
+                        this.experianApiConfig.getEncodedKeyStore(),
+                        this.experianApiConfig.getKeyStorePassword());
         this.identityVerificationService = createIdentityVerificationService();
     }
 
@@ -77,12 +75,5 @@ public class ServiceFactory {
                 .connectTimeout(Duration.ofSeconds(30))
                 .sslContext(this.sslContextFactory.getSSLContext())
                 .build();
-    }
-
-    private String persistKeystoreToFile() throws IOException {
-        String keystoreBase64 = this.experianApiConfig.getEncodedKeyStore();
-        Path tempFile = Files.createTempFile(null, null);
-        Files.write(tempFile, Base64.getDecoder().decode(keystoreBase64));
-        return tempFile.toString();
     }
 }

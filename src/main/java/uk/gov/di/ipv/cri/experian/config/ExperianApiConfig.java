@@ -3,7 +3,7 @@ package uk.gov.di.ipv.cri.experian.config;
 import software.amazon.lambda.powertools.parameters.SecretsProvider;
 
 public class ExperianApiConfig {
-    private static final String SECRET_KEY_TEMPLATE = "/%s/di-cri-experian-fraud-api/%s";
+    private static final String KEY_FORMAT = "/%s/di-cri-experian-fraud-api/%s";
 
     private final String tenantId;
     private final String endpointUrl;
@@ -15,14 +15,11 @@ public class ExperianApiConfig {
         String env = System.getenv("ENVIRONMENT");
         this.tenantId = System.getenv("EXPERIAN_API_TENANT_ID");
         this.endpointUrl = System.getenv("EXPERIAN_API_ENDPOINT_URL");
-        this.hmacKey =
-                secretsProvider.get(
-                        String.format(SECRET_KEY_TEMPLATE, env, "experian-api-hmac-key"));
-        this.encodedKeyStore =
-                secretsProvider.get(String.format(SECRET_KEY_TEMPLATE, env, "experian-api"));
+        this.hmacKey = secretsProvider.get(String.format(KEY_FORMAT, env, "experian-api-hmac-key"));
+        this.encodedKeyStore = secretsProvider.get(String.format(KEY_FORMAT, env, "experian-api"));
         this.keyStorePassword =
                 secretsProvider.get(
-                        String.format(SECRET_KEY_TEMPLATE, env, "experian-api-keystore-password"));
+                        String.format(KEY_FORMAT, env, "experian-api-keystore-password"));
     }
 
     public String getTenantId() {
