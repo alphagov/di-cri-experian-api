@@ -59,7 +59,7 @@ jobs:
           role-session-name: ${{ secrets.AWS_ROLE_SESSION }}
           aws-region: ${{ env.AWS_REGION }}
 
-        - name: Get signing profile name
+      - name: Get signing profile name
         id: code_signing
         run: echo "::set-output name=profile::$(aws ssm get-parameter --region ${{ env.AWS_REGION }} --name '${{ secrets.AWS_PROFILE_PATH }}' | jq '.Parameter.Value')"
 
