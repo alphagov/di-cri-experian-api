@@ -10,7 +10,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    environment: dri-ipv-dev
+    environment: di-ipv-dev
     steps:
       - uses: actions/checkout@v2
         with:
@@ -40,7 +40,7 @@ jobs:
     needs: build
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    environment: dri-ipv-dev
+    environment: di-ipv-dev
     if: github.event_name == 'push' && ${{ github.ref }} == 'KBV-57-sam-github-actions'
     env:
       AWS_REGION: eu-west-2
